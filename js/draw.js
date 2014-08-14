@@ -1,10 +1,4 @@
-var width = 650;
-var height = 600;
-var service = 0;
-var colors = ["#333333", "#0066CC", "#E6E600"]
-
-// Icons
-var borderDist = 65;
+var borderDist = 100;
 var iconSize = 75;
 var phoneImg = new Image();
 var waterImg = new Image();
@@ -13,6 +7,11 @@ var house1Img = new Image();
 var house2Img = new Image();
 var house3Img = new Image();
 
+var width = 800;
+var height = 4* borderDist + 3* iconSize;
+var service = 0;
+var colors = ["#333333", "#0066CC", "#E6E600"]
+
 
 $(function() {
     var canvasDiv = document.getElementById('drawingCanvas');
@@ -20,6 +19,7 @@ $(function() {
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
     canvas.setAttribute('id', 'canvas');
+    canvas.setAttribute('style', "background-color: #F0F0F0")
     canvasDiv.appendChild(canvas);
     if(typeof G_vmlCanvasManager != 'undefined') {
         canvas = G_vmlCanvasManager.initElement(canvas);
@@ -55,7 +55,8 @@ $(function() {
                 addClick(mouseX, mouseY, false);
                 redraw();
             }
-        }
+        } else
+            paint = false;
     });
 
     canvas.mousemove(function(e){
@@ -89,18 +90,18 @@ $(function() {
         }
         paint = false;
 
-        // Clear buffer
-        buffX = [];
-        buffY = [];
-        buffDrag = [];
-        buffColor = [];
-        redraw();
+        clearBuffer();
     });
 
     canvas.mouseleave(function(e){
+        clearBuffer();
         paint = false;
     });
-    
+
+    canvas.mouseenter(function(e){
+        drawIcons();
+    });
+
 	$('#clearCanvas').mousedown(function(e){
         clickX = [];
         clickY = [];
@@ -118,7 +119,14 @@ $(function() {
     var strokeColor = [];
     var buffColor = [];
     var paint;
-    var counter;
+
+    function clearBuffer(){
+        buffX = [];
+        buffY = [];
+        buffDrag = [];
+        buffColor = [];
+        redraw();
+    }
 
     function addClick(x, y, dragging) {
 
