@@ -25,6 +25,9 @@ var buffColor = [];
 var paint;
 var lastPos = [];
 
+
+
+
 $(function() {
     var canvasDiv = document.getElementById('drawingCanvas');
     var context;
@@ -35,6 +38,7 @@ $(function() {
     penSize = height / 60;
 
     var canvas;
+
 
     function resizeCanvas(){
         canvas = document.createElement('canvas');
@@ -55,24 +59,7 @@ $(function() {
             // Mouse location
             var mouseX = e.pageX - this.offsetLeft;
             var mouseY = e.pageY - this.offsetTop;
-            if(mouseX > borderDist && mouseX < borderDist + iconSize){
-                if(mouseY > borderDist && mouseY < borderDist + iconSize) {
-                    service = 0;
-                    addClick(mouseX, mouseY, false);
-                    redraw();
-                }
-                else if (mouseY > 2*borderDist+iconSize && mouseY < 2*borderDist+2*iconSize ) {
-                    service = 1;
-                    addClick(mouseX, mouseY, false);
-                    redraw();
-                }
-                else if (mouseY > 3*borderDist+2*iconSize && mouseY < 3*borderDist+3*iconSize ) {
-                    service = 2;
-                    addClick(mouseX, mouseY, false);
-                    redraw();
-                }
-            } else
-                paint = false;
+            click(mouseX,mouseY);
         });
 
         canvas.mousemove(function(e){
@@ -80,7 +67,6 @@ $(function() {
                 addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
                 redraw();
             }
-
         });
 
         canvas.mouseup(function(e){
@@ -89,25 +75,7 @@ $(function() {
             var mouseY = e.pageY - this.offsetTop;
             var rightEdge = context.canvas.width - borderDist;
             var leftEdge = context.canvas.width - borderDist - iconSize;
-
-            // If stroke ends in a house
-            if(paint && mouseX > leftEdge && mouseX < rightEdge){
-                if((mouseY > borderDist && mouseY < borderDist + iconSize) ||
-                   (mouseY > 2*borderDist+iconSize && mouseY < 2*borderDist+2*iconSize ) ||
-                   (mouseY > 3*borderDist+2*iconSize && mouseY < 3*borderDist+3*iconSize )) {
-                    var tmp = clickX.concat(buffX);
-                    clickX = tmp;
-                    tmp = clickY.concat(buffY);
-                    clickY = tmp;
-                    tmp = clickDrag.concat(buffDrag);
-                    clickDrag = tmp;
-                    tmp = strokeColor.concat(buffColor);
-                    strokeColor = tmp;
-                }
-            }
-            paint = false;
-
-            clearBuffer();
+            release(mouseX,mouseY,leftEdge,rightEdge);
         });
 
         canvas.on('touchstart',function(e){
@@ -115,24 +83,8 @@ $(function() {
             // Mouse location
             var mouseX = event.touches[0].pageX - this.offsetLeft;
             var mouseY = event.touches[0].pageY - this.offsetTop;
-            if(mouseX > borderDist && mouseX < borderDist + iconSize){
-                if(mouseY > borderDist && mouseY < borderDist + iconSize) {
-                    service = 0;
-                    addClick(mouseX, mouseY, false);
-                    redraw();
-                }
-                else if (mouseY > 2*borderDist+iconSize && mouseY < 2*borderDist+2*iconSize ) {
-                    service = 1;
-                    addClick(mouseX, mouseY, false);
-                    redraw();
-                }
-                else if (mouseY > 3*borderDist+2*iconSize && mouseY < 3*borderDist+3*iconSize ) {
-                    service = 2;
-                    addClick(mouseX, mouseY, false);
-                    redraw();
-                }
-            } else
-                paint = false;
+
+            click(mouseX,mouseY);
         });
 
         canvas.on('touchmove',function(e){
@@ -151,24 +103,7 @@ $(function() {
             var rightEdge = context.canvas.width - borderDist;
             var leftEdge = context.canvas.width - borderDist - iconSize;
 
-            // If stroke ends in a house
-            if(paint && mouseX > leftEdge && mouseX < rightEdge){
-                if((mouseY > borderDist && mouseY < borderDist + iconSize) ||
-                   (mouseY > 2*borderDist+iconSize && mouseY < 2*borderDist+2*iconSize ) ||
-                   (mouseY > 3*borderDist+2*iconSize && mouseY < 3*borderDist+3*iconSize )) {
-                    var tmp = clickX.concat(buffX);
-                    clickX = tmp;
-                    tmp = clickY.concat(buffY);
-                    clickY = tmp;
-                    tmp = clickDrag.concat(buffDrag);
-                    clickDrag = tmp;
-                    tmp = strokeColor.concat(buffColor);
-                    strokeColor = tmp;
-                }
-            }
-            paint = false;
-
-            clearBuffer();
+            release(mouseX,mouseY,leftEdge,rightEdge);
         });
 
         canvas.mouseleave(function(e){
@@ -200,15 +135,61 @@ $(function() {
     house2Img.src = "img/house2.png";
     house3Img.src = "img/house3.png";
 
+    function click(mouseX,mouseY){
+        if(mouseX > borderDist && mouseX < borderDist + iconSize){
+            if(mouseY > borderDist && mouseY < borderDist + iconSize) {
+                service = 0;
+                addClick(mouseX, mouseY, false);
+                redraw();
+            }
+            else if (mouseY > 2*borderDist+iconSize && mouseY < 2*borderDist+2*iconSize ) {
+                service = 1;
+                addClick(mouseX, mouseY, false);
+                redraw();
+            }
+            else if (mouseY > 3*borderDist+2*iconSize && mouseY < 3*borderDist+3*iconSize ) {
+                service = 2;
+                addClick(mouseX, mouseY, false);
+                redraw();
+            }
+        } else {
+            paint = false;
+        }
+    }
 
-
+    function release(mouseX,mouseY,leftEdge,rightEdge){
+        // If stroke ends in a house
+        if(paint && mouseX > leftEdge && mouseX < rightEdge){
+            if((mouseY > borderDist && mouseY < borderDist + iconSize) ||
+               (mouseY > 2*borderDist+iconSize && mouseY < 2*borderDist+2*iconSize ) ||
+               (mouseY > 3*borderDist+2*iconSize && mouseY < 3*borderDist+3*iconSize )) {
+                var tmp = clickX.concat(buffX);
+                clickX = tmp;
+                tmp = clickY.concat(buffY);
+                clickY = tmp;
+                tmp = clickDrag.concat(buffDrag);
+                clickDrag = tmp;
+                tmp = strokeColor.concat(buffColor);
+                strokeColor = tmp;
+            }
+        }
+        paint = false;
+        clearBuffer();
+    }
 
 	$('#clearCanvas').mousedown(function(e){
         clickX = [];
         clickY = [];
         clickDrag = [];
+        buffX = [];
+        buffY = [];
+        buffDrag = [];
         strokeColor = [];
-		clearCanvas(); 
+        buffColor = [];
+        paint = false;
+        lastPos = [];
+		clearCanvas();
+        drawIcons();
 	});
 
     function clearBuffer(){
@@ -216,11 +197,12 @@ $(function() {
         buffY = [];
         buffDrag = [];
         buffColor = [];
+        paint = false;
+        lastPos = [];
         redraw();
     }
 
     function addClick(x, y, dragging) {
-
         buffX.push(x);
         buffY.push(y);
         buffDrag.push(dragging);
